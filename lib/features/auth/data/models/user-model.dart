@@ -8,6 +8,7 @@ class UserModel {
     this.gender,
     this.image,
     this.token,
+    th
   });
 
   UserModel.fromJson(dynamic json) {
@@ -18,7 +19,7 @@ class UserModel {
     lastName = json['lastName'];
     gender = json['gender'];
     image = json['image'];
-    token = json['token'];
+    token = json['accessToken'];
   }
   num? id;
   String? username;
@@ -57,7 +58,7 @@ class UserModel {
     map['lastName'] = lastName;
     map['gender'] = gender;
     map['image'] = image;
-    map['token'] = token;
+    map['accessToken'] = token;
     return map;
   }
 }

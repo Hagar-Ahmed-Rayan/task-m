@@ -8,9 +8,10 @@ class ApiService {
   ApiService(this._dio);
 
 
-  String? token = CacheHelper.getData(key: 'token');
 
   Future<Map<String, dynamic>> get({required String endPoint}) async {
+    String? token = CacheHelper.getData(key: 'token');
+
     var response = await _dio.get(
       '${Endpoints.baseUrl}$endPoint',
       options: Options(
@@ -25,13 +26,13 @@ class ApiService {
 
   Future<Map<String, dynamic>> post(
       {required String endPoint, required Map<String, dynamic> data}) async {
+
     var response = await _dio.post(
       '${Endpoints.baseUrl}$endPoint',
       data: data,
       options: Options(
         headers: {
           'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
         },
       ),
     );

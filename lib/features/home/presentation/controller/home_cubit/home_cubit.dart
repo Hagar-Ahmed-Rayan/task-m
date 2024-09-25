@@ -18,9 +18,9 @@ class HomeCubit extends Cubit<HomeState> {
     firstPageKey: 0,
   );
   Future<void> getTasks(int page) async {
-    if (page == 0)
+    if (page == 0) {
       emit(GetTasksLoading());
-    else {
+    } else {
       emit(GetTasksPaginationLoading());
     }
 
@@ -32,7 +32,7 @@ class HomeCubit extends Cubit<HomeState> {
         emit(GetTasksPaginationErrorState(failure.message));
       }
     }, (todoModel) {
-      int total = todoModel.total!; //254
+      int total = todoModel.total!;
       if (page >= total) {
         todoModel.todos = [];
       }

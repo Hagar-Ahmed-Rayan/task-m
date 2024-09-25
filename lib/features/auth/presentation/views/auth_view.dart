@@ -1,94 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_manager/common/utils/cache_helper.dart';
-import 'package:task_manager/features/auth/data/models/login_request_model.dart';
+import 'package:task_manager/common/utils/service_locator.dart';
+import 'package:task_manager/features/auth/data/repo_impl/auth_repo_impl.dart';
+import 'package:task_manager/features/auth/domain/use_cases/auth_use_case.dart';
 import 'package:task_manager/features/auth/presentation/controller/login_cubit/login_cubit.dart';
 import 'package:task_manager/features/auth/presentation/controller/login_cubit/login_state.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:task_manager/features/auth/presentation/views/widgets/custom_text_field.dart';
 import 'package:task_manager/features/home/presentation/views/home_view.dart';
 
 class LoginScreen extends StatelessWidget {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: const Text('Login'),
       ),
-      body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthLoading) {
-            // Show loading indicator
-            //showDialog(
-              //context: context,
-             // barrierDismissible: false,
-              //builder: (context) =>
+      body: BlocProvider(
+        create: (context) => AuthCubit(
+          LoginUseCase(
+            getIt.get<AuthRepoImpl>(),
+          ),
+        ),
+        child: BlocConsumer<AuthCubit, AuthState>(
+          listener: (context, state) {
+         if (state is AuthFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errMessage)),
+              );
+            } else if (state is AuthSuccess) {
+            //  AuthCubit.get(context).saveToShared(state.userModel.token!);
 
 
-               //   Center(child: CircularProgressIndicator());
-         //   );
-          } else if (state is AuthFailure) {
-            // Hide loading indicator and show error
-            Navigator.of(context).pop(); // hide the loading indicator
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errMessage)),
-            );
-          } else if (state is AuthSuccess) {
-            String token =state.userModel.token!;
-            AuthCubit.get(context).saveToShared( token);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeView()),
+              );
+            }
+          },
+          builder: (context, state) {
+            return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: BlocProvider.of<AuthCubit>(context)
+                      .formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CustomTextField(
+                        controller: BlocProvider.of<AuthCubit>(context)
+                            .usernameController,
+                        hintText: 'Enter your Username',
+                        isPassword: false,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your username';
+                          }
 
+                          return null;
+                        },
+                      ),
+                      CustomTextField(
+                        hintText: 'Enter your Password',
+                        controller: BlocProvider.of<AuthCubit>(context)
+                            .passwordController,
+                        isPassword: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
 
-            CacheHelper.saveData( key: 'userId', value: state.userModel.id.toString());
+                          return null;
+                        },
+                      ),
 
-
-
-
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeView()),
-            );
-
-
-          }
-        },
-        builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
-                ),
-                TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    String username = _usernameController.text;
-                    String password = _passwordController.text;
-                    final loginRequest = LoginRequestModel(
-                      username: username,
-                      password: password,
-                    );
-                    AuthCubit.get(context).login(loginRequest);
-                 //   BlocProvider.of<AuthCubit>(context).login(loginRequest);
-
-                  },
-                  child: Text('Login'),
-                ),
-              ],
-            ),
-          );
-        },
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          BlocProvider.of<AuthCubit>(context)
+                              .validateLoginData();
+                        },
+                        child: const Text('Login'),
+                      ),
+                    ],
+                  ),
+                ));
+          },
+        ),
       ),
     );
   }
 }
+

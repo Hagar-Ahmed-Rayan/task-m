@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_manager/common/utils/cache_helper.dart';
 import 'package:task_manager/common/widgets/no-data_found.dart';
 import 'package:task_manager/features/home/data/models/todos.dart';
 import 'package:task_manager/features/home/presentation/controller/home_cubit/home_cubit.dart';
@@ -22,6 +21,8 @@ class _HomeViewState extends State<HomeView> {
   bool isLoading = false;
   bool lastCurrentPageItem = false;
   bool noMoreData = false;
+  List<Todos> todos = [];
+
   @override
   void initState() {
     scrollController = ScrollController();
@@ -52,7 +53,6 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 
-  List<Todos> todos = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +63,7 @@ class _HomeViewState extends State<HomeView> {
       body: BlocConsumer<HomeCubit, HomeState>(
         listener: (context, state) {
           if (state is GetTasksSuccessState) {
-            int total = state.tasks.total!; //254
+            int total = state.tasks.total!;
 
             todos.addAll(state.tasks.todos!);
             if (todos.length == total) {
@@ -119,12 +119,9 @@ class _HomeViewState extends State<HomeView> {
                     )
               : (state is GetTasksErrorState)
                   ? Center(child: Text(state.errMessage.toString()))
-                  : ListView.builder(
-                      controller: scrollController,
-                      itemCount: 5,
-                      itemBuilder: (context, i) {
-                        return const ShimmerList();
-                      });
+                  : const ShimmerList();
+
+
         },
       ),
       floatingActionButton: FloatingActionButton(

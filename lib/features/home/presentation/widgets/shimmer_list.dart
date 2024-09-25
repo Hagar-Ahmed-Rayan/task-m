@@ -9,7 +9,7 @@ class ShimmerList extends StatelessWidget {
     return SizedBox(
       height: 300,
       child: ListView.builder(
-        itemCount: 5,
+        itemCount: 6,
         itemBuilder: (context, index) {
           return const ShimmerItem();
         },
